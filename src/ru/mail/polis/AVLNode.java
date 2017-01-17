@@ -1,3 +1,5 @@
+package ru.mail.polis;
+
 public class AVLNode<E extends Comparable<? super E>> {
 
     private AVLNode<E> left, right;

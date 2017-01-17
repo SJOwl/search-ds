@@ -1,4 +1,6 @@
-package ru.mail.polis;
+package test;
+
+import ru.mail.polis.OpenHashTable;
 
 import static org.junit.Assert.*;
 

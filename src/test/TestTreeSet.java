@@ -1,14 +1,11 @@
-package ru.mail.polis;
+package test;
+
+import ru.mail.polis.AVLTree;
+import ru.mail.polis.ISortedSet;
+import ru.mail.polis.RedBlackTree;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.NoSuchElementException;
-import java.util.Random;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.concurrent.Callable;
 
 /**
@@ -40,14 +37,22 @@ public class TestTreeSet {
             pre();
             return null;
         });
-        test(DataStructures.AVLTree.class.getName());
+        test(AVLTree.class.getName());
         test(RedBlackTree.class.getName());
+    }
+
+    public void run(Callable<Void> callable) {
+        try {
+            callable.call();
+        } catch (AssertionError | Exception ae) {
+            ae.printStackTrace();
+        }
     }
 
     private void pre() {
         int LEN = 10;
         SortedSet<Integer> OK = new TreeSet<>();
-        //        ISortedSet<Integer> set = new AVLTree<>();
+        //  ISortedSet<Integer> set = new AVLTree<>();
         ISortedSet<Integer> set = new RedBlackTree<>();
         for (int value = 0; value < LEN; value++) {
             check(OK, set, value, true);
@@ -76,6 +81,72 @@ public class TestTreeSet {
                 testTree(iterator.previousIndex(), new TreeSet<>(comp), create(className, comp));
                 return null;
             });
+        }
+    }
+
+    private void check(SortedSet<Integer> OK, ISortedSet<Integer> set, int value, boolean add) {
+        assert OK.contains(value) == set.contains(value);
+        if (!OK.isEmpty()) {
+            assert OK.first().equals(set.first());
+            assert OK.last().equals(set.last());
+        }
+        assert OK.size() == set.size();
+        assert OK.contains(value) == set.contains(value);
+        if (add) {
+            assert OK.add(value) == set.add(value);
+        } else {
+            assert OK.remove(value) == set.remove(value);
+        }
+        assert OK.size() == set.size();
+        assert OK.contains(value) == set.contains(value);
+        if (add) {
+//            assert OK.add(value) == set.add(value);
+        } else {
+            assert OK.remove(value) == set.remove(value);
+        }
+        assert OK.size() == set.size();
+        assert OK.contains(value) == set.contains(value);
+        if (!OK.isEmpty()) {
+            assert OK.first().equals(set.first());
+            assert OK.last().equals(set.last());
+        }
+    }
+
+    private void checkEmptyAndNull(ISortedSet<Integer> set) {
+        assert set.isEmpty();
+        assert set.size() == 0;
+        try {
+            set.first();
+            assert true;
+        } catch (NoSuchElementException e) {
+            /* empty */
+        }
+        try {
+            set.last();
+            assert false;
+        } catch (NoSuchElementException e) {
+            /* empty */
+        }
+        try {
+            set.add(null);
+            assert false;
+        } catch (NullPointerException e) {
+            /* empty */
+        }
+        try {
+            set.remove(null);
+            assert false;
+        } catch (NullPointerException e) {
+            /* empty */
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private ISortedSet<Integer> create(String className, Comparator<Integer> comparator) {
+        try {
+            return (ISortedSet<Integer>) Class.forName(className).getConstructor(Comparator.class).newInstance(comparator);
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+            throw new AssertionError(e);
         }
     }
 
@@ -122,79 +193,5 @@ public class TestTreeSet {
             check(OK, set, i, false);
         }
         System.out.println("^^^^^^^^^^^^^^^^^^^^^ " + cmpIdx + " ^^^^^^^^^^^^^^^^^^^");
-    }
-
-    private void check(SortedSet<Integer> OK, ISortedSet<Integer> set, int value, boolean add) {
-        assert OK.contains(value) == set.contains(value);
-        if (!OK.isEmpty()) {
-            assert OK.first().equals(set.first());
-            assert OK.last().equals(set.last());
-        }
-        assert OK.size() == set.size();
-        assert OK.contains(value) == set.contains(value);
-        if (add) {
-            assert OK.add(value) == set.add(value);
-        } else {
-            assert OK.remove(value) == set.remove(value);
-        }
-        assert OK.size() == set.size();
-        assert OK.contains(value) == set.contains(value);
-        if (add) {
-            assert OK.add(value) == set.add(value);
-        } else {
-            assert OK.remove(value) == set.remove(value);
-        }
-        assert OK.size() == set.size();
-        assert OK.contains(value) == set.contains(value);
-        if (!OK.isEmpty()) {
-            assert OK.first().equals(set.first());
-            assert OK.last().equals(set.last());
-        }
-    }
-
-    private void checkEmptyAndNull(ISortedSet<Integer> set) {
-        assert set.isEmpty();
-        assert set.size() == 0;
-        try {
-            set.first();
-            assert false;
-        } catch (NoSuchElementException e) {
-            /* empty */
-        }
-        try {
-            set.last();
-            assert false;
-        } catch (NoSuchElementException e) {
-            /* empty */
-        }
-        try {
-            set.add(null);
-            assert false;
-        } catch (NullPointerException e) {
-            /* empty */
-        }
-        try {
-            set.remove(null);
-            assert false;
-        } catch (NullPointerException e) {
-            /* empty */
-        }
-    }
-
-    public void run(Callable<Void> callable) {
-        try {
-            callable.call();
-        } catch (AssertionError | Exception ae) {
-            ae.printStackTrace();
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private ISortedSet<Integer> create(String className, Comparator<Integer> comparator) {
-        try {
-            return (ISortedSet<Integer>) Class.forName(className).getConstructor(Comparator.class).newInstance(comparator);
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-            throw new AssertionError(e);
-        }
     }
 }

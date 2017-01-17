@@ -4,7 +4,7 @@ import ru.mail.polis.RedBlackTree;
 
 import static org.junit.Assert.assertTrue;
 
-public class TestDriver {
+public class RBTreeTest {
     static RedBlackTree<Integer> tree;
     /**
      * @param args
