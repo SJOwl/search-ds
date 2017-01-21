@@ -8,12 +8,13 @@ import java.util.List;
 public class OpenHashTable<E extends Comparable<E>> implements ISet<E> {
 
     private Comparator<E> comparator;
-    private int TABLE_SIZE = 8;
+    private int TABLE_SIZE;
     private int size;
     private double loadFactor;
     HashEntry<E>[] table;
 
     public OpenHashTable() {
+        TABLE_SIZE=8;
         table = new HashEntry[TABLE_SIZE];
         for (int i = 0; i < TABLE_SIZE; i++) {
             table[i] = null;
@@ -42,7 +43,9 @@ public class OpenHashTable<E extends Comparable<E>> implements ISet<E> {
             }
         }
         return list.toString();
-    }    public int getPos(E value) {
+    }
+
+    public int getPos(E value) {
         int hash = hashCode(value);
         while (table[hash] != null && !table[hash].getValue().equals(value)) {
             hash = (hash + 1) % TABLE_SIZE;
@@ -131,8 +134,6 @@ public class OpenHashTable<E extends Comparable<E>> implements ISet<E> {
         }
         return false;
     }
-
-
 
     private int hashCode(E value) {
         return Math.abs(value.toString().hashCode()) % TABLE_SIZE;

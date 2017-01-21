@@ -1,4 +1,7 @@
-package ru.mail.polis;
+package AVL;
+
+import ru.mail.polis.BTreePrinter;
+import ru.mail.polis.ISortedSet;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -6,23 +9,26 @@ import java.util.List;
 
 public class AVLTree<E extends Comparable<E>> implements ISortedSet<E> {
 
-    private final Comparator<E> comparator;
+    private Comparator<E> comparator;
     private AVLNode<E> rootAbove;
     private int size;
+
+    public AVLTree(Comparator<E> comparator) {
+        this();
+        this.comparator = comparator;
+    }
 
     public AVLTree() {
         this.comparator = null;
         rootAbove = new AVLNode<E>();
     }
 
-    public AVLTree(Comparator<E> comparator) {
-        rootAbove = new AVLNode<E>();
-        this.comparator = comparator;
-    }
-
     @Override
     public E first() {
         AVLNode<E> node = rootAbove;
+        if (node == null) {
+            return null;
+        }
         while (node.getLeft() != null) {
             node = node.getLeft();
         }
@@ -32,7 +38,9 @@ public class AVLTree<E extends Comparable<E>> implements ISortedSet<E> {
     @Override
     public E last() {
         AVLNode<E> node = rootAbove.getLeft();
-        if(node==null) return null;
+        if (node == null) {
+            return null;
+        }
         while (node.getRight() != null
                 && node.getElement() != null) {
             node = node.getRight();
@@ -44,7 +52,9 @@ public class AVLTree<E extends Comparable<E>> implements ISortedSet<E> {
     @Override
     public List<E> inorderTraverse() {
         List<E> list = new ArrayList<E>();
-        inorderTraverseRL(rootAbove.getLeft(), list);
+        if (rootAbove != null) {
+            inorderTraverseRL(rootAbove.getLeft(), list);
+        }
         return list;
     }
 
@@ -62,6 +72,14 @@ public class AVLTree<E extends Comparable<E>> implements ISortedSet<E> {
         insert(element, rootAbove.getLeft());
     }
 
+    public void printTree() {
+        if (rootAbove == null) {
+            // System.out.println("rootAbove: null");
+            return;
+        }
+        BTreePrinter.printNode(rootAbove.getLeft());
+    }
+
     /**
      * @param rotateBase: The root of the subtree that is being rotated
      * @param rootAbove:  The AVLNode that points to rotateBase
@@ -70,6 +88,7 @@ public class AVLTree<E extends Comparable<E>> implements ISortedSet<E> {
      */
     public void rotate(AVLNode<E> rotateBase, AVLNode<E> rootAbove) {
         int balance = rotateBase.getBalance();
+        //System.out.println("Balance is "+balance);
         if (Math.abs(balance) < 2) {
             //System.out.println("No rotate");
         }
@@ -79,10 +98,11 @@ public class AVLTree<E extends Comparable<E>> implements ISortedSet<E> {
             return;
         }
         int childBalance = child.getBalance();
+        //System.out.println("child balance: "+childBalance);
         AVLNode<E> grandChild = null;
         //both the child and grandchild are on the
         //left side, so rotate the child up to the root position
-        if (balance < -1 && childBalance < 0) {
+        if (balance < -1 && childBalance <= 0) {
             if (rootAbove != this.rootAbove && rootAbove.getRight() == rotateBase) {
                 rootAbove.setRightNode(child);
             } else {
@@ -95,7 +115,7 @@ public class AVLTree<E extends Comparable<E>> implements ISortedSet<E> {
         }
         //both the child and the grandchild are on the
         //right side, so rotate the child up to the root position
-        else if (balance > 1 && childBalance > 0) {
+        else if (balance > 1 && childBalance >= 0) {
             if (rootAbove != this.rootAbove && rootAbove.getRight() == rotateBase) {
                 rootAbove.setRightNode(child);
             } else {
@@ -110,7 +130,7 @@ public class AVLTree<E extends Comparable<E>> implements ISortedSet<E> {
         //right side, so rotate the grandchild up to the child position
         //so the condition of the first if statement is satisfied,
         //then recurse to have the first if statement evaluated
-        else if (balance < -1 && childBalance > 0) {
+        else if (balance < -1 && childBalance >= 0) {
             grandChild = child.getRight();
             rotateBase.setLeftNode(grandChild);
             child.setRightNode(grandChild.getLeft());
@@ -122,7 +142,7 @@ public class AVLTree<E extends Comparable<E>> implements ISortedSet<E> {
         //left side, so rotate the grandchild up to the child position
         //so the condition of the second if statement is satisfied,
         //then recurse to have the second if statement evaluated
-        else if (balance > 1 && childBalance < 0) {
+        else if (balance > 1 && childBalance <= 0) {
             grandChild = child.getLeft();
             rotateBase.setRightNode(grandChild);
             child.setLeftNode(grandChild.getRight());
@@ -149,14 +169,23 @@ public class AVLTree<E extends Comparable<E>> implements ISortedSet<E> {
 
     @Override
     public boolean contains(E value) {
-        if(value == null) return false;
-        AVLNode<E> temp = rootAbove.getLeft();
-        while (temp != null) {
-            if (temp.getElement().equals(value)) {
-                return true;
+        if (value == null) {
+            System.out.println("null value in contains(value)!");
+            return false;
+        }
+        if (rootAbove != null && rootAbove.getLeft() != null) {
+            AVLNode<E> curr = rootAbove.getLeft();
+            int cmp;
+            while (curr != null) {
+                cmp = compare(curr.getElement(), value);
+                if (cmp == 0) {
+                    return true;
+                } else if (cmp < 0) {
+                    curr = curr.getRight();
+                } else {
+                    curr = curr.getLeft();
+                }
             }
-            int balance = value.compareTo(temp.getElement());
-            temp = (balance < 0) ? temp.getLeft() : temp.getRight();
         }
         return false;
     }
@@ -164,39 +193,38 @@ public class AVLTree<E extends Comparable<E>> implements ISortedSet<E> {
     // todo
     @Override
     public boolean add(E value) {
-        // найти место для вставки
-        insert(value, rootAbove.getLeft());
-        // вставить
-        // балансировать
-        size++;
-        return true;
+        if (insert(value, rootAbove.getLeft()) == true) {
+            size++;
+            // System.out.println("value " + value + " is added");
+            return true;
+        }
+        // System.out.println("value " + value + " is already in the Tree");
+        return false;
     }
 
     // todo
     @Override
     public boolean remove(E value) {
-        // элемент есть-удалить
-        if (contains(value)) {
-            remove(value, rootAbove.getLeft());
+        if (rootAbove == null) {
+            return false;
+        }
+        if (remove(value, rootAbove.getLeft()) == true) {
             size--;
+            // System.out.println("value " + value + " is removed");
             return true;
         }
-        // нет - вернуть false
+        // System.out.println("Tree doesn't contain " + value);
         return false;
+    }
+
+    private int compare(E v1, E v2) {
+        return comparator == null ? v1.compareTo(v2) : comparator.compare(v1, v2);
     }
 
     @Override
     public String toString() {
         List<E> list = inorderTraverse();
         return list.toString();
-    }
-
-    private void inorderTraverseRL(AVLNode<E> node, List<E> list) {
-        if (node != null) {
-            inorderTraverseRL(node.getLeft(), list);
-            list.add(node.getElement());
-            inorderTraverseRL(node.getRight(), list);
-        }
     }
 
     /**
@@ -209,6 +237,10 @@ public class AVLTree<E extends Comparable<E>> implements ISortedSet<E> {
      *               recursively rebalance as necessary.
      */
     private boolean insert(E value, AVLNode<E> temp) {
+        if (value == null) {
+            System.out.println("null in insert value!");
+            return false;
+        }
         if (this.rootAbove.getLeft() == null) {
             this.rootAbove.setLeftNode(new AVLNode<E>(value));
             return true;
@@ -217,37 +249,33 @@ public class AVLTree<E extends Comparable<E>> implements ISortedSet<E> {
         //comparison of element to temp.element
         //remember that left means that element <= temp.element
         //and right means element > temp.element
-        int compare = value.compareTo(temp.getElement());
-        //travel to the left of the Tree, inserting
-        //if the bottom has been reached
-        if (compare <= 0) {
-            //System.out.println(temp.getLeft());
-            if (temp.getLeft() == null) {
-                temp.setLeft(value);
-                return true;
+        int cmp =compare(value, temp.getElement());
+        // only unique elements in the tree
+        if (cmp == 0) {
+            return false;
+        }
+        while (true) {
+            cmp =compare(value, temp.getElement());
+            if (cmp == 0) {
+                return false;
             }
-            insert(value, temp.getLeft());
-        }
-        //otherwise, travelling to the right of the Tree,
-        //inserting if the bottom has been reached
-        else {
-            if (temp.getRight() == null) {
-                temp.setRight(value);
-                return true;
+            if (cmp > 0) {
+                if (temp.getRight() != null) {
+                    temp = temp.getRight();
+                } else {
+                    temp.setRight(value);
+                    reBalance(temp);
+                    break;
+                }
+            } else if (cmp < 0) {
+                if (temp.getLeft() != null) {
+                    temp = temp.getLeft();
+                } else {
+                    temp.setLeft(value);
+                    reBalance(temp);
+                    break;
+                }
             }
-            insert(value, temp.getRight());
-        }
-        //if the root is being evaluated it, rotate if necessary
-        if (temp == rootAbove.getLeft()) {
-            rotate(rootAbove.getLeft(), rootAbove);
-        }
-        //otherwise, rotate the left and right subtrees
-        //as necessary
-        if (temp.getLeft() != null) {
-            rotate(temp.getLeft(), temp);
-        }
-        if (temp.getRight() != null) {
-            rotate(temp.getRight(), temp);
         }
         return true;
     } //end insert
@@ -263,40 +291,97 @@ public class AVLTree<E extends Comparable<E>> implements ISortedSet<E> {
      *                 element on its left child or the far left element on its right
      *                 child replaces it.
      ***/
-    private void remove(E element, AVLNode<E> temp) {
-        if (temp == null) {
-            return;
+    private boolean remove(E element, AVLNode<E> temp) {
+        if (element == null) {
+            throw new NullPointerException("element is null");
         }
-        int compare = 0;
-        if (temp != rootAbove) {
-            compare = element.compareTo(temp.getElement());
+        if (rootAbove == null) {
+            return false;
         }
-        boolean direction = (compare > 0 && temp != rootAbove);
-        AVLNode<E> child = direction ? temp.getRight() : temp.getLeft();
-        if (child == null) {
-            return;
+        if (rootAbove.getLeft() == null) {
+            return false;
         }
-        //if the root is perfectly balanced, slide the left Node up
-        //and reinsert the left.right element if necessary
-        if (temp == rootAbove && child.getBalance() == 0
-                && child.getElement().equals(element)) {
-            AVLNode<E> newRoot = child.getLeft();
-            if (newRoot == null) {
-                rootAbove.setLeftNode(null);
-                return;
+        AVLNode<E> parent = rootAbove.getLeft();
+        AVLNode<E> curr = rootAbove.getLeft();
+        int cmp;
+        while ((cmp = compare(curr.getElement(), element)) != 0) {
+            parent = curr;
+            if (cmp > 0) {
+                curr = curr.getLeft();
             } else {
-                enactRemoval(temp, child, false);
-                return;
+                curr = curr.getRight();
+            }
+            if (curr == null) {
+                return false; // ничего не нашли
             }
         }
-        //if the element is found and the root is not
-        // perfectly balanced, remove it using enactRemoval()
-        else if (element.compareTo(child.getElement()) == 0) {
-            enactRemoval(temp, child, direction);
+        if (curr.getLeft() != null && curr.getRight() != null) {
+            AVLNode<E> next = curr.getRight();
+            AVLNode<E> pNext = curr;
+            while (next.getLeft() != null) {
+                pNext = next;
+                next = next.getLeft();
+            } //next = наименьший из больших
+            curr.setElement(next.getElement());
+            next.setElement(null);
+            //у правого поддерева нет левых потомков
+            if (pNext == curr) {
+                curr.setRightNode(next.getRight());
+            } else {
+                pNext.setLeftNode(next.getRight());
+            }
+            next.setRightNode(null);
+        } else {
+            if (curr.getLeft() != null) {
+                reLink(parent, curr, curr.getLeft());
+                //reBalance(curr.getLeft());
+            } else if (curr.getRight() != null) {
+                reLink(parent, curr, curr.getRight());
+                //reBalance(curr.getRight());
+            } else {
+                reLink(parent, curr, null);
+            }
         }
-        //otherwise, recursively traverse the tree
-        else {
-            remove(element, child);
+        reBalance(parent);
+        return true;
+    }
+
+    private void reLink(AVLNode<E> parent, AVLNode<E> curr, AVLNode<E> child) {
+        if (parent == curr) {
+            rootAbove.setLeftNode(child);
+        } else if (parent.getLeft() == curr) {
+            parent.setLeftNode(child);
+        } else {
+            parent.setRightNode(child);
+        }
+        curr.setElement(null);
+    }
+
+    private AVLNode<E> getNode(E value) {
+        if (value == null) {
+            throw new NullPointerException("value is null");
+        }
+        if (rootAbove.getLeft() != null) {
+            AVLNode<E> curr = rootAbove.getLeft();
+            while (curr != null) {
+                int cmp = compare(curr.getElement(), value);
+                if (cmp == 0) {
+                    return curr;
+                } else if (cmp < 0) {
+                    curr = curr.getRight();
+                } else {
+                    curr = curr.getLeft();
+                }
+            }
+        }
+        return null;
+    }
+
+    private void inorderTraverseRL(AVLNode<E> node, List<E> list) {
+        if (node != null) {
+            inorderTraverseRL(node.getLeft(), list);
+            list.add(node.getElement());
+            inorderTraverseRL(node.getRight(), list);
         }
     }
 
@@ -374,7 +459,18 @@ public class AVLTree<E extends Comparable<E>> implements ISortedSet<E> {
         return temp;
     }
 
-    private int compare(E v1, E v2) {
-        return comparator == null ? v1.compareTo(v2) : comparator.compare(v1, v2);
+    private void reBalance(AVLNode<E> node) {
+        if (node.getParent() == null) {
+            return;
+        }
+        //        System.out.println("Before balancing: ");
+        //        this.printTree();
+        while (node != rootAbove) {
+            //System.out.println("ROTATE " + node.getElement());
+            rotate(node, node.getParent());
+            node = node.getParent();
+        }
+        //        System.out.println("After balancing: ");
+        //        this.printTree();
     }
 }

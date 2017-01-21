@@ -1,88 +1,101 @@
 package test;
 
-import ru.mail.polis.AVLTree;
-
-import static org.junit.Assert.assertTrue;
+import AVL.AVLTree;
 
 public class AVLTreeTest {
     static AVLTree<Integer> tree;
+
+    static void checkAdd(Integer val) {
+        contain(val);
+        size();
+        add(val);
+        print();
+        size();
+        contain(val);
+        add(val);
+        print();
+        size();
+        contain(val);
+        System.out.println();
+    }
+
+    static void contain(Integer val) {
+        System.out.println("contains " + val + ": " + tree.contains(val));
+    }
+
+    static void size() {
+        System.out.println("Size: " + tree.size());
+    }
+
+    static void add(Integer val) {
+        System.out.println("add: " + val + " " + tree.add(val));
+    }
+
+    private static void print() {
+        System.out.println(tree.toString());
+    }
+
+    static void checkRemove(Integer val) {
+        contain(val);
+        size();
+        remove(val);
+        print();
+        size();
+        contain(val);
+        remove(val);
+        print();
+        size();
+        remove(val);
+        System.out.println();
+    }
+
+    static void remove(Integer x) {
+        System.out.println("remove " + x + " " + tree.remove(x));
+    }
+
     public static void main(String[] args) {
         tree = new AVLTree<>();
         System.out.println("testing of AVLTree");
-
-
-        assertTrue("isEmpty", tree.isEmpty() == true);
-        assertTrue("size!=0", tree.size() == 0);
-        printTree();
-        System.out.println("first = " + tree.first());
-        System.out.println("last = " + tree.last());
-
-        for (int i = 0; i < 10; i++){
-            tree.add(i);
-            printTree();
-            System.out.println(tree.contains(i));
+        for (int i = 0; i < 20; i++) {
+            Integer x1=i;
+            Integer x2=i-1;
+            System.out.println("compare "+x1 +" & "+ x2+" = " +x1.compareTo(x2));
         }
-        for (int i = 0; i < 10; i++){
-            System.out.println(tree.contains(i));
-            tree.remove(i);
-            printTree();
-            System.out.println(tree.contains(i));
-        }
-
-        tree.add(70);
-        printTree();
-        System.out.println("first = " + tree.first());
-        System.out.println("last = " + tree.last());
-        assertTrue("size!=1", tree.size() == 1);
-
-        tree.add(66);
-        printTree();
-        System.out.println("first = " + tree.first());
-        System.out.println("last = " + tree.last());
-
-        tree.add(57);
-        printTree();
-
-        tree.add(54);
-        printTree();
-
-        tree.add(51);
-        printTree();
-
-        tree.add(55);
-        printTree();
-        assertTrue("isEmpty", tree.isEmpty() == false);
-        assertTrue(tree.contains(55) == true);
-        // size
-        // isEmpty
-        // contains
-        // add
-        // remove
-        tree.remove(55);
-        printTree();
-        System.out.println(tree.size());
-        assertTrue("size!=5", tree.size() == 5);
-        System.out.println("first = " + tree.first());
-        System.out.println("last = " + tree.last());
-
-        // inorderTraverse
-        tree.add(65);
-        printTree();
-
-        tree.add(95);
-        printTree();
-
-        tree.add(152);
-        printTree();
-
-        tree.add(140);
-        printTree();
-
-        System.out.println("51: "+tree.contains(51));
-        System.out.println("null: "+tree.contains(null));
     }
 
-    private static void printTree() {
-        System.out.println(tree.toString());
+    static void check(int value) {
+        for (int i = 0; i <= value; i++) {
+            contain(i);
+        }
+        if (!tree.isEmpty()) {
+            first();
+            last();
+        }
+        size();
+        for (int i = 0; i <= value; i++) {
+            contain(i);
+        }
+        add(value);
+        size();
+        for (int i = 0; i <= value; i++) {
+            contain(i);
+        }
+        add(value);
+        size();
+        for (int i = 0; i <= value; i++) {
+            contain(i);
+        }
+        if (!tree.isEmpty()) {
+            first();
+            last();
+        }
+    }
+
+    static void first() {
+        System.out.println("first: " + tree.first());
+    }
+
+    static void last() {
+        System.out.println("last: " + tree.last());
     }
 }

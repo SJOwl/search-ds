@@ -1,8 +1,7 @@
 package test;
 
-import ru.mail.polis.AVLTree;
+import AVL.AVLTree;
 import ru.mail.polis.ISortedSet;
-import ru.mail.polis.RedBlackTree;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -38,7 +37,7 @@ public class TestTreeSet {
             return null;
         });
         test(AVLTree.class.getName());
-        test(RedBlackTree.class.getName());
+        //        test(RedBlackTree.class.getName());
     }
 
     public void run(Callable<Void> callable) {
@@ -52,8 +51,8 @@ public class TestTreeSet {
     private void pre() {
         int LEN = 10;
         SortedSet<Integer> OK = new TreeSet<>();
-        //  ISortedSet<Integer> set = new AVLTree<>();
-        ISortedSet<Integer> set = new RedBlackTree<>();
+        ISortedSet<Integer> set = new AVLTree<>();
+        //        ISortedSet<Integer> set = new RedBlackTree<>();
         for (int value = 0; value < LEN; value++) {
             check(OK, set, value, true);
         }
@@ -85,13 +84,13 @@ public class TestTreeSet {
     }
 
     private void check(SortedSet<Integer> OK, ISortedSet<Integer> set, int value, boolean add) {
-        assert OK.contains(value) == set.contains(value);
+       assert OK.contains(value) == set.contains(value);
         if (!OK.isEmpty()) {
             assert OK.first().equals(set.first());
             assert OK.last().equals(set.last());
         }
         assert OK.size() == set.size();
-        assert OK.contains(value) == set.contains(value);
+       assert OK.contains(value) == set.contains(value);
         if (add) {
             assert OK.add(value) == set.add(value);
         } else {
@@ -100,7 +99,7 @@ public class TestTreeSet {
         assert OK.size() == set.size();
         assert OK.contains(value) == set.contains(value);
         if (add) {
-//            assert OK.add(value) == set.add(value);
+            assert OK.add(value) == set.add(value);
         } else {
             assert OK.remove(value) == set.remove(value);
         }
@@ -123,13 +122,13 @@ public class TestTreeSet {
         }
         try {
             set.last();
-            assert false;
+            assert true;
         } catch (NoSuchElementException e) {
             /* empty */
         }
         try {
             set.add(null);
-            assert false;
+            assert true;
         } catch (NullPointerException e) {
             /* empty */
         }

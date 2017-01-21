@@ -1,6 +1,7 @@
 package test;
 
-import ru.mail.polis.RedBlackTree;
+
+import RBTree.RedBlackTree;
 
 import static org.junit.Assert.assertTrue;
 
